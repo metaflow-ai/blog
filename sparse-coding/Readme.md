@@ -327,7 +327,7 @@ Finally I venture in the auto-encoder area to see if my idea makes more sense th
 #### Convolutionnal Sparse auto-encoder
 Convolutionnal neural net jointly trained with a sparse auto-encoder (N = 39200):
 
-![Autoencoder results](https://gist.githubusercontent.com/morgangiraud/9268b95bc1debd2feac37414c035ba03/raw/results-ae.jpg "Autoencoder results")
+![Autoencoder results](results-ae.jpg "Autoencoder results")
 
 **Some remarks:**
 - We actually **accelerated**(in terms of iteration, not time) and **improved** the learning of the classifier with sparsity. That's an interesting result!
