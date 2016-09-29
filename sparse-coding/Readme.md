@@ -40,7 +40,7 @@ Put simply, we are just trying to resolve a problem (in this case, reconstructio
 
 **Note on the constraint on D rows:**
 
-If you don't apply any constraint on D rows you can actually minimize **h** as much as you want while making **D** big enough to compensate. We want to avoid this behavior as we are looking for vector containing actual zero value with only as few as possible non-zeros and big values.
+If you don't apply any constraint on D rows you can actually minimize **h** as much as you want while making **D** big enough to compensate. We want to avoid this behaviour as we are looking for vector containing actual zero value with only as few as possible non-zeros and big values.
 
 The value of C doesn't really matter, in our case, we will choose **C = 1**
 
@@ -89,7 +89,7 @@ The other extreme corresponds to dense code: half of the neurons get activated p
 
 Why half (average activity ratio of 0.5)?
 
-Remember we are looking at neurons in the ensemble, for any given distribution of activated neurons with an activity ratio > 0.5, you could swap activated ones with the inactivated ones without losing information in the ensemble. Remember that all neurons are used to encode information, to the opposite of sparse code, one neurons doen't hold any specific information in itself. 
+Remember we are looking at neurons in the ensemble, for any given distribution of activated neurons with an activity ratio > 0.5, you could swap activated ones with the inactivated ones without losing information in the ensemble. Remember that all neurons are used to encode information, to the opposite of sparse code, one neurons doesn't hold any specific information in itself. 
 
 ### Sparse code
 Everything in between those two extremes is what we call sparse code. We take into account only a subset of neurons to encode information.
@@ -120,7 +120,7 @@ You can interpret the neural network weights as the weights of an encoder (tryin
 How much neurons? you said. It seems impossible to tell without experiment, this is why we use cross validation to optimize hyper-parameters.
 If the number of neurons (and so, dimensions) is greater than the intrinsic vector space of the data, then it means that you can infer an over-complete basis and so, you can achieve sparse coding in your neural network. If you don't have enough neurons, you will compress your data with some loss, getting worst results when you try to reproduce the data.
 
-Why not using as much neurons as we can? Because this is just too expensive and terribly ineficient.
+Why not using as much neurons as we can? Because this is just too expensive and terribly inefficient.
 
 ## Why having a sparse representation of data can be useful?
 ### Intuitions
@@ -160,7 +160,7 @@ In sparse code, if we set **d** to be the average density of neurons activation 
 Obviously, the more neurons you need to observe to detect what feature has been encoded, the more complex it will be to decode information.
 
 #### Sum up
-(N: total numbers of neurons, d: average density of activations, we simplify the behavior of neurons as activated or not)
+(N: total numbers of neurons, d: average density of activations, we simplify the behaviour of neurons as activated or not)
 
 |            | Local code | Sparse code | Dense code |
 |------------|------------|-------------|------------|
@@ -179,9 +179,9 @@ As you can see sparse code seems to be the perfect middle ground between having 
 ## How to use it in neural networks?
 The simplest known usage of combining neural networks and sparse coding is in sparse auto-encoder: It is a neural network that will try to mimic the identity function while under some constraint of sparsity in the hidden layers or the objective function.
 
-After learning the concept, I wanted to try some experiments that I've never seen around. My idea was to use the ReLU activation combined with a L1 norm in the objective functions to promote sparse neurons activations: Let's see (with code and Tensorflow) how far can we go with this idea.
+After learning the concept, I wanted to try some experiments that I've never seen around. My idea was to use the ReLU activation combined with a L1 norm in the objective functions to promote sparse neurons activations: Let's see (with code and TensorFlow) how far can we go with this idea.
 
-### Some experiments with Tensorflow
+### Some experiments with TensorFlow
 We will now try to validate our previous statement with some very simple neural networks.
 Multiple questions here:
 - Can we reach (at all) local code on the MNIST dataset?
@@ -297,10 +297,10 @@ for sc in [0, 1e-4, 5e-4, 1e-3, 2.7e-3]:
                 print('batch: %d, loss: %f, accuracy: %f' % (i + 1, current_loss, acc))
 ```
 
-*Since we are talking about images, I've done another experiment using a convolutional neural network and 200 feature maps (Remember that the weight are shared between feature map in convolutionnal neural net, we are just looking for a local feature everywhere in the image)*
+*Since we are talking about images, I've done another experiment using a convolutional neural network and 200 feature maps (Remember that the weight are shared between feature map in convolutional neural net, we are just looking for a local feature everywhere in the image)*
 
 Et voila!
-Let's launch our little experiment (Do it yourself to see graphs with tensorboard)
+Let's launch our little experiment (Do it yourself to see graphs with TensorBoard)
 Here is the summary for (20000 iterations):
 
 Fully connected neural net (N = 784 neurons):
@@ -334,7 +334,7 @@ Convolutionnal neural net jointly trained with a sparse auto-encoder (N = 39200)
 - The auto-encoder got worse with sparsity, until you quantize again real values to integer, In this case, the auto-encoder didn't change much (Average squared errors per pixels < 1).
 
 ## Conclusion
-It was very interesting to explore sparse coding and finally test the concept with some very simple but concrete example. Tensorflow is definitly very efficient for fast prototyping, having access to every variables and operations allows one to customize any process very easily.
+It was very interesting to explore sparse coding and finally test the concept with some very simple but concrete example. TensorFlow is definitely very efficient for fast prototyping, having access to every variables and operations allows one to customize any process very easily.
 
 I don't think this work would lead to anything interesting in terms of neural networks, but I believe it clearly shows the concept of sparse coding in this field.
 
