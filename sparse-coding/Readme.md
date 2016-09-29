@@ -24,7 +24,7 @@ To do so, sparse coding algorithms try to satisfy two constraints at the same ti
 - For each representation as a vector **h**, it will try to learn a basis **D** to reconstruct the original datum as a vector **x**.
 
 The mathematical representation of the general objective function for this problem speaks for itself:
-![General equation of the sparse coding algorithm](https://gist.githubusercontent.com/morgangiraud/9268b95bc1debd2feac37414c035ba03/raw/sparse-coding-equation.jpg "Sparse coding equation")
+![General equation of the sparse coding algorithm](sparse-coding-equation.jpg "Sparse coding equation")
 where:
 - **N** is the number of datum in the data
 - **x_k** is the **k** given vector of the data
@@ -305,7 +305,7 @@ Here is the summary for (20000 iterations):
 
 Fully connected neural net (N = 784 neurons):
 
-![Fully connected neural net results](https://gist.githubusercontent.com/morgangiraud/9268b95bc1debd2feac37414c035ba03/raw/results-fc.jpg "Fully connected neural net results")
+![Fully connected neural net results](results-fc.jpg "Fully connected neural net results")
 
 **Some remarks:**
 - Without sparsity constraint the networks converge under a dense network (<~0.5 average activity ratio)
@@ -316,7 +316,7 @@ Fully connected neural net (N = 784 neurons):
 #### Convolutionnal neural network
 Convolutionnal neural net (N = 39200, note that neurons are spatially distributed):
 
-![Convolutionnal neural net results](https://gist.githubusercontent.com/morgangiraud/9268b95bc1debd2feac37414c035ba03/raw/results-cnn.jpg "Convolutionnal neural net results")
+![Convolutionnal neural net results](results-cnn.jpg "Convolutionnal neural net results")
 
 **Some remarks:**
 - We are very close to the capacity of the fully connecter neural network. 
