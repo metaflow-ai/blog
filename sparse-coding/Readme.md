@@ -1,4 +1,4 @@
-# Sparse coding: what is it? Why use it? How to use it?
+# Sparse coding: A simple exploration
 
 *Disclaimer:* I don't own a Ph.D in machine learning, yet I'm deeply passionate about the field and try to learn as much as I can about it.
 
@@ -222,43 +222,44 @@ sparsity_constraint = tf.placeholder(tf.float32)
 ```
 We add our neural layer and calculate the average density of activations:
 ```python
-
 # Variables
 with tf.variable_scope('NeuralLayer'):
-    W = tf.get_variable('W', shape=[784, 784], initializer=tf.random_normal_initializer(stddev=1e-3))
-    b = tf.get_variable('b', shape=[784], initializer=tf.constant_initializer(0.0))
+    W = tf.get_variable('W', shape=[784, 784], initializer=tf.random_normal_initializer(stddev=1e-1))
+    b = tf.get_variable('b', shape=[784], initializer=tf.constant_initializer(0.1))
 
     z = tf.matmul(x, W) + b
     a = tf.nn.relu(z)
 
     # We graph the average density of neurons activation
-    # We sum all activations per input data of the batch and averaged the result
     average_density = tf.reduce_mean(tf.reduce_sum(tf.cast((a > 0), tf.float32), reduction_indices=[1]))
     tf.scalar_summary('AverageDensity', average_density)
 ```
 
-We finish with the softmax layer and the loss, note that we add our sparsity constraint on activations in the loss
+We add the softmax layer 
 ```python
 with tf.variable_scope('SoftmaxLayer'):
-    W_s = tf.get_variable('W_s', shape=[784, 10], initializer=tf.random_normal_initializer(stddev=1e-3))
-    b_s = tf.get_variable('b_s', shape=[10], initializer=tf.constant_initializer(0.0))
+    W_s = tf.get_variable('W_s', shape=[784, 10], initializer=tf.random_normal_initializer(stddev=1e-1))
+    b_s = tf.get_variable('b_s', shape=[10], initializer=tf.constant_initializer(0.1))
 
     out = tf.matmul(a, W_s) + b_s
     y = tf.nn.softmax(out)
+```
 
+We finish with the loss: note that we add our sparsity constraint on activations
+```
 with tf.variable_scope('Loss'):
     epsilon = 1e-7 # After some training, y can be 0 on some classes which lead to NaN 
     cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_true * tf.log(y + epsilon), reduction_indices=[1]))
     # We add our sparsity constraint on the activations
-    # Since ReLU always output values bigger than 0, this is equivalent to lhe L1 norm
     loss = cross_entropy + sparsity_constraint * tf.reduce_sum(a)
 
     tf.scalar_summary('loss', loss) # Graph the loss
 ```
-Now we are going to merge all the defined summaries and only then we will calculate accuracy and create its summary. 
-We do that in this order to avoid graphing the accuracy every iteration
+
+Now we are going to merge all the so far defined summaries and only then we will calculate accuracy and create its summary. 
+We do that in this order because it is convenient and we avoid graphing the accuracy every iteration
 ```python
-summaries = tf.merge_all_summaries()
+summaries = tf.merge_all_summaries() # This is convenient
 
 with tf.variable_scope('Accuracy'):
     correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_true, 1))
