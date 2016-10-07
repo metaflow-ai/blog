@@ -11,7 +11,7 @@ A shape is a list (or tuple) of numbers describing the size of the array in each
 - For a tensor of n dimensions: [D_0, D_1, ..., D_n-1] 
 - For a tensor of size W x H (usually called a matrix): [W, H] 
 - For a tensor of size W (usually called a vector): [W,]
-- For a simple scalar: [] or [1,] (those are equivalent)
+- For a simple scalar: [] or [1,]  (those are equivalent)
 
 *Note on the vector: in TensorFLow it is impossible to determine if a vector is a row or column vector by looking at the shape, and in fact it doesn't matter*
 
