@@ -1,29 +1,31 @@
 # Tensor shapes in TensorFlow and dynamic batch size
 
-If you don't want to struggle hours debugging your shapes in TensorFlow, here is a simple HowTo to understand the concept
+Here is a simple HowTo to understand the concept of shapes in TensorFlow and hopefully avoid losing hours of debugging them
 
-Very briefly, a Tensor is an array of n-dimension containing the same type (int32, bool, etc.)
-Any tensor in general can be describe with what we call a shape:
+### What is a tensor?
+Very briefly: 
+- A Tensor is an array of n-dimension containing the same type (int32, bool, etc.)
+- Any tensor in general can be described with what we call a shape
 
-It is a list (or tuple) of numbers describing the size of the array in each dimension, for exemple:
+A shape is a list (or tuple) of numbers describing the size of the array in each dimension, for exemple:
 - For a tensor of n dimensions: [D_0, D_1, ..., D_n-1] 
 - For a tensor of size W x H (usually called a matrix): [W, H] 
 - For a tensor of size W (usually called a vector): [W,]
 - For a simple scalar: [] or [1,] (those are equivalent)
 
-*Note on the vector: in tensorflow it is impossible to determine if a vector is a row or column vector by looking at the shape, and in fact it doesn't matter*
+*Note on the vector: in TensorFLow it is impossible to determine if a vector is a row or column vector by looking at the shape, and in fact it doesn't matter*
 
-Now, here is the the most important piece of this article: Tensor in TensorFlow has **2** shapes:
+Now, here is the the most important piece of this article: **Tensor in TensorFlow has 2 shapes!**
 - The static shape
 - The dynamic shape
 
 ### The static shape
-The static shape is the shape inferred by TensorFlow when you define your computational graph
+The static shape is the shape inferred by TensorFlow when you define your computational graph.
 
-TensorFlow will do its best to guess the shape of your different but it won't always be able to do it.
-Especially if you have a placeholder with a non-defined dimension size. Like when you want to use a dynamic batch size
+TensorFlow will do its best to guess the shape of your different tensors but it won't always be able to do it.
+Especially if you have a placeholder with a non-defined dimension size (like when you want to use a dynamic batch size).
 
-To use this shape (Accessing or changing), you will use the different functions which are attached to the tensor:
+To use the static shape (Accessing/changing) in your code, you will use the different functions which are **attached to the Tensor itself and have an underscore**:
 ```python
 my_tensor = tf.constant(0, shape=[6,2])
 my_static_shape = my_tensor.get_shape() # TensorShape([Dimension(6), Dimension(2)])
@@ -34,22 +36,23 @@ print(my_static_shape.as_list()) # -> [6, 2]
 my_tensor.set_shape([d_0, ...]) # It is used mostly to ensure you have a precise shape
 ```
 
-*The static shape is very usefull to debug your code with print to check what your are doing while you define your graph.*
+*The static shape is very useful to debug your code with print so you can check what your are doing while you define your graph.*
 
 ### The dynamic shape
 The dynamic shape is the actual one used when you compute things.
 
-For example, if you defined a placeholder with undefined dimension (with `None`), this `None` dimension will only have a value when you provide a value to your placeholder and for any variable depending on this placeholder
+If you defined a placeholder with undefined dimensions (with `None`), those `None` dimensions will only have a value when you provide an actual value to your placeholder and, more importantly, for any variable depending on this placeholder.
 
-To use this shape(Accessing or changing), you will use the different functions which are attached to the main scope:
+To use the dynamic shape(Accessing/changing) in your code, you will use the different functions which are **attached to the main scope and don't have an underscore**:
 ```python
 my_tensor = tf.constant(0, shape=[6,2]) # <tf.Tensor 'Const_4:0' shape=(5, 2) dtype=int32>
 tf.shape(my_tensor) # <tf.Tensor 'Shape:0' shape=(2,) dtype=int32>
+# As you can see, we don't have access to any values describing the shape
 
 my_reshaped_tensor = tf.reshape(my_tensor, [2, 3, 2]) # <tf.Tensor 'Reshape_2:0' shape=(2, 3, 2) dtype=int32>
 ```
 
-*The dynamic shape is not very handy for debugging, but it is very handi for dealing with undefined dimension*
+*The dynamic shape is not very handy for debugging, but it is very handy for dealing with undefined dimensions*
 
 ## The RNN use case
 So here we are, interested in dynamic inputs we want to build a RNN which should be able to handle any different length of lists
@@ -70,7 +73,7 @@ outputs, encoder_final_state = tf.nn.dynamic_rnn(cell, rnn_inputs, initial_state
 And now, you need to initialize the init_state cell `cell.zero_state(batch_size, tf.float32)` ...
 
 But what batch_size should be equal to, when you want it to be dynamic ?
-TensorFlow allows different type here, if you open the inner code you will find:
+TensorFlow allows different types here, if you open the inner code you will find:
 ```python
 Args:
       batch_size: int, float, or unit Tensor representing the batch size.
@@ -92,9 +95,9 @@ If you try:
 ```python
 batch_size = my_tensor.get_shape().as_list()[0]
 ```
-`batch_size` will be the TensorFlow `Dimension` type (printed as '?'). Surprinsingly, you still won't always be able to use that either
+`batch_size` will be the TensorFlow `Dimension` type (printed as '?'). Surprisingly, you still won't always be able to use that either.
 
-What you want to do is actually to keep the dynamic `batch_size` flow trhough the graph, so you must use the dynamic shape:
+What you want to do is actually to keep the dynamic `batch_size` flow though the graph, so you must use the dynamic shape:
 ```python
 batch_size = tf.shape(my_tensor)[0]
 ```
@@ -102,7 +105,7 @@ batch_size = tf.shape(my_tensor)[0]
 
 ## Conclusion
 - Use the static shape for debugging
-- Use the dynamic shape everywhere especially when you habe ubdefined dimension
+- Use the dynamic shape everywhere especially when you have undefined dimension
 
 
 ## References
