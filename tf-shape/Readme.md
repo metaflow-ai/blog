@@ -18,9 +18,9 @@ Now, here is the the most important piece of this article: Tensor in TensorFlow 
 - The dynamic shape
 
 ### The static shape
-The static shape is the shape inferred by Tensorflow when you define your computational graph
+The static shape is the shape inferred by TensorFlow when you define your computational graph
 
-Tensorflow will do its best to guess the shape of your different but it won't always be able to do it.
+TensorFlow will do its best to guess the shape of your different but it won't always be able to do it.
 Especially if you have a placeholder with a non-defined dimension size. Like when you want to use a dynamic batch size
 
 To use this shape (Accessing or changing), you will use the different functions which are attached to the tensor:
@@ -70,41 +70,42 @@ outputs, encoder_final_state = tf.nn.dynamic_rnn(cell, rnn_inputs, initial_state
 And now, you need to initialize the init_state cell `cell.zero_state(batch_size, tf.float32)` ...
 
 But what batch_size should be equal to, when you want it to be dynamic ?
-Tensorflow allows different type here, if you open the inner code you will find:
+TensorFlow allows different type here, if you open the inner code you will find:
 ```python
 Args:
       batch_size: int, float, or unit Tensor representing the batch size.
 ```
+int and float can't be used because when you defined your graph, you actually don't know what the batch_size will be.
 
-The interesting piece here is: "unit Tensor representing the batch size"
-If you dig the doc up from there, you will find that a unit Tensor is a 0-d Tensor which is a Scalar
-Usually the shape will be `shape=()`
-https://www.tensorflow.org/versions/r0.11/resources/dims_types.html
+The interesting piece is the last type: **"unit Tensor representing the batch size"**
 
-So how do you get that anyway? Coming back to our problems,
+If you dig the doc up from there, you will find that a unit Tensor is a **0-d Tensor** which is a **Scalar**
+
+So how do you get that scalar-tensor anyway? Let's see:
 If you try:
 ```python
 batch_size = my_tensor.get_shape()[0]
 ```
-batch_size will be the None type, The None type can only be used as a dimension for placeholders
-tensorflow like to know dimensions to check before hand if things will go well
+`batch_size` will be the `None` type, The `None` type can only be used as a dimension for placeholders.
 
 If you try:
 ```python
 batch_size = my_tensor.get_shape().as_list()[0]
 ```
-batch_size will be the TensorFlow Dimension type printed as '?'
-Surprinsingly, you still won't always be able to use that either
+`batch_size` will be the TensorFlow `Dimension` type (printed as '?'). Surprinsingly, you still won't always be able to use that either
 
-What you want to do is actually to keep the dynamic batch_size flow trhough the graph
-And the only reliable way i found to do that is this way:
+What you want to do is actually to keep the dynamic `batch_size` flow trhough the graph, so you must use the dynamic shape:
 ```python
 batch_size = tf.shape(my_tensor)[0]
 ```
-batch_size will be a TensorFlow Tensor type
+`batch_size` will be a TensorFlow `0-d Tensor` type, hooray!
+
+## Conclusion
+- Use the static shape for debugging
+- Use the dynamic shape everywhere especially when you habe ubdefined dimension
 
 
 ## References
 *Dive deep by reading the doc and the code!*
-[https://www.tensorflow.org/versions/r0.11/resources/faq.html](Tensorflow faq)
-
+[https://www.tensorflow.org/versions/r0.11/resources/faq.html](TensorFlow faq)
+[https://www.tensorflow.org/versions/r0.11/resources/dims_types.html](TensorFlow dimensions types documentation)
