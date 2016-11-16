@@ -1,0 +1,2 @@
+model_checkpoint_path: "data-v2.chkp"
+all_model_checkpoint_paths: "data-v2.chkp"
