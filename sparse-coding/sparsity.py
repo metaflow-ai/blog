@@ -26,7 +26,7 @@ with tf.variable_scope('NeuralLayer'):
 
     # We graph the average density of neurons activation
     average_density = tf.reduce_mean(tf.reduce_sum(tf.cast((a > 0), tf.float32), reduction_indices=[1]))
-    tf.scalar_summary('AverageDensity', average_density)
+    tf.summary.scalar('AverageDensity', average_density)
 
 with tf.variable_scope('SoftmaxLayer'):
     W_s = tf.get_variable('W_s', shape=[784, 10], initializer=tf.random_normal_initializer(stddev=1e-1))
@@ -41,16 +41,16 @@ with tf.variable_scope('Loss'):
     # We add our sparsity constraint on the activations
     loss = cross_entropy + sparsity_constraint * tf.reduce_sum(a)
 
-    tf.scalar_summary('loss', loss) # Graph the loss
+    tf.summary.scalar('loss', loss) # Graph the loss
 
 # We merge summaries before the accuracy summary to avoid 
 # graphing the accuracy with training data
-summaries = tf.merge_all_summaries()
+summaries = tf.summary.merge_all()
 
 with tf.variable_scope('Accuracy'):
     correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_true, 1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-    acc_summary = tf.scalar_summary('accuracy', accuracy) 
+    acc_summary = tf.summary.scalar('accuracy', accuracy) 
 
 # Training
 adam = tf.train.AdamOptimizer(learning_rate=1e-3)
@@ -60,8 +60,8 @@ sess = None
 for sc in [0, 1e-4, 5e-4, 1e-3, 2.7e-3]:
     result_folder = dir + '/results/' + str(int(time.time())) + '-fc-sc' + str(sc)
     with tf.Session() as sess:
-        sess.run(tf.initialize_all_variables())
-        sw = tf.train.SummaryWriter(result_folder, sess.graph)
+        sess.run(tf.global_variables_initializer())
+        sw = tf.summary.FileWriter(result_folder, sess.graph)
         
         for i in range(20000):
             batch = mnist.train.next_batch(100)

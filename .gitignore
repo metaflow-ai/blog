@@ -1,3 +1,5 @@
 **/env
 **/*data*
-tf-freeze/results/*
+**/results/*
+gist-medium/*
+.DS_Store

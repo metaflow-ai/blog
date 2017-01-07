@@ -64,7 +64,7 @@ print("Size if final batch: %d" % len(batches[-1]))
 
 global_count = 0
 with tf.Session() as sess:
-    sess.run(tf.initialize_all_variables())
+    sess.run(tf.global_variables_initializer())
     for i in range(epochs):
         for batch in batches:
             # print(batch[0].shape, batch[1].shape)

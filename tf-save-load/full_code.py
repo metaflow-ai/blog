@@ -54,14 +54,15 @@ with tf.variable_scope("loss"):
 graph = tf.get_default_graph()
 
 
-# Remember: the next word can only be predicted from the prvious word
-seq_length = 1
+# Remember: the next word can only be predicted from the previous word
+num_steps = 1
+batch_size = corpus_length // 2
 nb_epochs = 1000
 # with tf.Session() as sess:
-#     sess.run(tf.initialize_all_variables())
+#     sess.run(tf.global_variables_initializer())
 
 #     for i in range(nb_epochs):
-#         input_gen = reader.ptb_iterator(id_corpus, corpus_length // 4, seq_length)
+#         input_gen = reader.ptb_iterator(id_corpus, corpus_length // 4, num_steps)
 #         for x_batch, y_true_batch in input_gen:
 #             to_compute = [train_op, loss_op, global_step_tensor]
 #             feed_dict = {
@@ -74,10 +75,11 @@ nb_epochs = 1000
 #                 print('Iteration %d/%d - loss:%f' % (global_step, nb_epochs, loss))
 
 
-input_gen = reader.ptb_iterator(id_corpus, corpus_length // 2, seq_length)
-input_gen = itertools.cycle(input_gen)
+input_gen = reader.ptb_producer(id_corpus, batch_size, num_steps)
 def feed_function():
-    x_batch, y_true_batch = next(input_gen)
+    # learn.train creates a session accessible in this function scope
+    x_batch = input_gen[0].eval()
+    y_true_batch = input_gen[1].eval()
     return {
         x: x_batch,
         y_true: y_true_batch
@@ -94,6 +96,6 @@ final_loss = tf.contrib.learn.train(
     supervisor_save_model_secs=1,
     keep_checkpoint_max=5,
     supervisor_save_summaries_steps=1,
-    feed_fn=feed_function
+    feed_fn=feed_function,
 )
 

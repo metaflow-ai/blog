@@ -1,4 +1,7 @@
+import os
 import tensorflow as tf
+
+dir = os.path.dirname(os.path.realpath(__file__))
 
 # First, you design your mathematical operations
 # We are the default graph scope
@@ -18,9 +21,9 @@ v2_saver = tf.train.Saver({"v2": v2})
 # By default the Session handles the default graph and all its included variables
 with tf.Session() as sess:
   # Init v and v2   
-  sess.run(tf.initialize_all_variables())
+  sess.run(tf.global_variables_initializer())
   # Now v1 holds the value 1.0 and v2 holds the value 2.0
   # We can now save all those values
-  all_saver.save(sess, 'data.chkp')
+  all_saver.save(sess, dir + '/results/data.chkp')
   # or saves only v2
-  v2_saver.save(sess, 'data-v2.chkp')
+  v2_saver.save(sess, dir + '/results/data-v2.chkp')

@@ -127,7 +127,7 @@ sess = None
 for sc in [0, 1e-5, 5e-5, 1e-4, 5e-4]:
     result_folder = dir + '/results/' + str(int(time.time())) + '-ae-sc' + str(sc)
     with tf.Session() as sess:
-        sess.run(tf.initialize_all_variables())
+        sess.run(tf.global_variables_initializer())
         sw = tf.train.SummaryWriter(result_folder, sess.graph)
 
         for i in range(20000):

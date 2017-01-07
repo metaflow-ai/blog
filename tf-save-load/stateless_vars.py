@@ -5,7 +5,7 @@ v2 = tf.Variable(2. , name="v2")
 a = tf.add(p, v2)
 
 with tf.Session() as sess:
-  sess.run(tf.initialize_all_variables())
+  sess.run(tf.global_variables_initializer())
   # From the moment we initiliaze variables, until the end of the Session
   # We can access them
   print(sess.run(v2)) # -> 2.
