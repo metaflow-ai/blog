@@ -44,7 +44,7 @@ with tf.variable_scope("linear"):
 
 with tf.variable_scope("loss"):
     y_true_reshaped = tf.reshape(y_true, [-1])
-    losses = tf.nn.sparse_softmax_cross_entropy_with_logits(z, y_true_reshaped)
+    losses = tf.nn.sparse_softmax_cross_entropy_with_logits(None, y_true_reshaped, z)
     loss_op = tf.reduce_mean(losses)
 
     adam = tf.train.AdamOptimizer(1e-3)

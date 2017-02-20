@@ -15,7 +15,7 @@ with tf.variable_scope('NN'):
     a = tf.nn.relu(tf.matmul(inputs_placeholder, W1) + b1)
     a2 = tf.nn.relu(tf.matmul(inputs_placeholder, W2) + b2)
 
-    y = tf.div(tf.add(a, a2), 2)
+    y = tf.divide(tf.add(a, a2), 2)
 
 with tf.variable_scope('Loss'):
     loss = tf.reduce_sum(tf.square(y - labels_placeholder) / 2)

@@ -231,8 +231,8 @@ with tf.variable_scope('NeuralLayer'):
     a = tf.nn.relu(z)
 
     # We graph the average density of neurons activation
-    average_density = tf.reduce_mean(tf.reduce_sum(tf.cast((a > 0), tf.float32), reduction_indices=[1]))
-    tf.scalar_summary('AverageDensity', average_density)
+    average_density = tf.reduce_mean(tf.reduce_sum(tf.cast((a > 0), tf.float32), axis=[1]))
+    tf.summary.scalar('AverageDensity', average_density)
 ```
 
 We add the softmax layer 
@@ -249,22 +249,22 @@ We finish with the loss: note that we add our sparsity constraint on activations
 ```
 with tf.variable_scope('Loss'):
     epsilon = 1e-7 # After some training, y can be 0 on some classes which lead to NaN 
-    cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_true * tf.log(y + epsilon), reduction_indices=[1]))
+    cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_true * tf.log(y + epsilon), axis=[1]))
     # We add our sparsity constraint on the activations
     loss = cross_entropy + sparsity_constraint * tf.reduce_sum(a)
 
-    tf.scalar_summary('loss', loss) # Graph the loss
+    tf.summary.scalar('loss', loss) # Graph the loss
 ```
 
 Now we are going to merge all the so far defined summaries and only then we will calculate accuracy and create its summary. 
 We do that in this order because it is convenient and we avoid graphing the accuracy every iteration
 ```python
-summaries = tf.merge_all_summaries() # This is convenient
+summaries = tf.summary.merge_all() # This is convenient
 
 with tf.variable_scope('Accuracy'):
     correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_true, 1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-    acc_summary = tf.scalar_summary('accuracy', accuracy) 
+    acc_summary = tf.summary.scalar('accuracy', accuracy) 
 ```
 Now we finish with the training/testing part
 ```python
@@ -276,8 +276,8 @@ sess = None
 for sc in [0, 1e-4, 5e-4, 1e-3, 2.7e-3]:
     result_folder = dir + '/results/' + str(int(time.time())) + '-fc-sc' + str(sc)
     with tf.Session() as sess:
-        sess.run(tf.initialize_all_variables())
-        sw = tf.train.SummaryWriter(result_folder, sess.graph)
+        sess.run(tf.global_variables_initializer())
+        sw = tf.summary.FileWriter(result_folder, sess.graph)
         
         for i in range(20000):
             batch = mnist.train.next_batch(100)

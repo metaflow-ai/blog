@@ -37,7 +37,7 @@ with tf.variable_scope('Graph') as scope:
     b_s = tf.get_variable('b_s', shape=[10], initializer=tf.constant_initializer(0.1))
     logits = tf.matmul(a, W_s) + b_s
     
-    loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits, y_true))
+    loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(None, y_true, logits))
     tf.summary.scalar('loss', loss) # Graph the loss
     adam = tf.train.AdamOptimizer(learning_rate=1e-3)
     train_op = adam.minimize(loss)    

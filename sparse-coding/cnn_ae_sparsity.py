@@ -11,17 +11,17 @@ def _phase_shift(I, r):
     bsize = tf.shape(I)[0] # I've made a minor change to the original implementation to enable Dimension(None) for the batch dim
     X = tf.reshape(I, (bsize, a, b, r, r))
     X = tf.transpose(X, (0, 1, 2, 4, 3))  # bsize, a, b, 1, 1
-    X = tf.split(1, a, X)  # a, [bsize, b, r, r]
-    X = tf.concat(2, [tf.squeeze(x) for x in X])  # bsize, b, a*r, r
-    X = tf.split(1, b, X)  # b, [bsize, a*r, r]
-    X = tf.concat(2, [tf.squeeze(x) for x in X])  # bsize, a*r, b*r
+    X = tf.split(X, a, 1)  # a, [bsize, b, r, r]
+    X = tf.concat([tf.squeeze(x) for x in X], 2)  # bsize, b, a*r, r
+    X = tf.split(X, b, 1)  # b, [bsize, a*r, r]
+    X = tf.concat([tf.squeeze(x) for x in X], 2)  # bsize, a*r, b*r
     return tf.reshape(X, (bsize, a*r, b*r, 1))
 
 
 def PS(X, r, color=False):
     if color:
-        Xc = tf.split(3, 3, X)
-        X = tf.concat(3, [_phase_shift(x, r) for x in Xc])
+        Xc = tf.split(X, 3, 3)
+        X = tf.concat([_phase_shift(x, r) for x in Xc], 3)
     else:
         X = _phase_shift(X, r)
     return X
@@ -53,8 +53,8 @@ with tf.variable_scope('NeuralLayer'):
     a = tf.nn.relu(z1)
 
     # We graph the average density of neurons activation
-    average_density = tf.reduce_mean(tf.reduce_sum(tf.cast((a > 0), tf.float32), reduction_indices=[1, 2, 3]))
-    tf.scalar_summary('AverageDensity', average_density)
+    average_density = tf.reduce_mean(tf.reduce_sum(tf.cast((a > 0), tf.float32), axis=[1, 2, 3]))
+    tf.summary.scalar('AverageDensity', average_density)
 
 a_vec_size = 14 * 14 * 200 
 
@@ -92,31 +92,31 @@ with tf.variable_scope('Decoder_phaseshift'):
 
 with tf.variable_scope('Loss'):
     epsilon = 1e-7 # After some training, y can be 0 on some classes which lead to NaN 
-    loss_classifier = tf.reduce_mean(-tf.reduce_sum(y_true * tf.log(y + epsilon), reduction_indices=[1]))
-    # loss_ae = tf.reduce_mean(tf.reduce_sum(tf.square(x_img - z_decoder), reduction_indices=[1, 2, 3]))
-    loss_ae_ps = tf.reduce_mean(tf.reduce_sum(tf.square(x_img - z_decoder_ps), reduction_indices=[1, 2, 3]))
+    loss_classifier = tf.reduce_mean(-tf.reduce_sum(y_true * tf.log(y + epsilon), axis=[1]))
+    # loss_ae = tf.reduce_mean(tf.reduce_sum(tf.square(x_img - z_decoder), axis=[1, 2, 3]))
+    loss_ae_ps = tf.reduce_mean(tf.reduce_sum(tf.square(x_img - z_decoder_ps), axis=[1, 2, 3]))
     loss_sc = sparsity_constraint * tf.reduce_sum(a)
     loss = loss_classifier + loss_ae_ps + loss_sc
 
-    # tf.scalar_summary('loss_ae', loss_ae)
-    tf.scalar_summary('loss_ae_ps', loss_ae_ps)
-    tf.scalar_summary('loss_classifier', loss_classifier)
-    tf.scalar_summary('loss_sc', loss_sc)
-    tf.scalar_summary('loss', loss)
+    # tf.summary.scalar('loss_ae', loss_ae)
+    tf.summary.scalar('loss_ae_ps', loss_ae_ps)
+    tf.summary.scalar('loss_classifier', loss_classifier)
+    tf.summary.scalar('loss_sc', loss_sc)
+    tf.summary.scalar('loss', loss)
 
 
 # We merge summaries before the accuracy summary to avoid 
 # graphing the accuracy with training data
-summaries = tf.merge_all_summaries()
+summaries = tf.summary.merge_all()
 
 with tf.variable_scope('Accuracy'):
     correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_true, 1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-    acc_summary = tf.scalar_summary('accuracy', accuracy) 
+    acc_summary = tf.summary.scalar('accuracy', accuracy) 
    
     # Let's see the actual tensorflow reconstruction 
-    input_img_summary = tf.image_summary("input", x_img, 1)
-    rec_img_summary_ps = tf.image_summary("reconstruction", z_decoder_ps, 1)
+    input_img_summary = tf.summary.image("input", x_img, 1)
+    rec_img_summary_ps = tf.summary.image("reconstruction", z_decoder_ps, 1)
 
 
 # Training
@@ -128,7 +128,7 @@ for sc in [0, 1e-5, 5e-5, 1e-4, 5e-4]:
     result_folder = dir + '/results/' + str(int(time.time())) + '-ae-sc' + str(sc)
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
-        sw = tf.train.SummaryWriter(result_folder, sess.graph)
+        sw = tf.summary.FileWriter(result_folder, sess.graph)
 
         for i in range(20000):
             batch = mnist.train.next_batch(100)

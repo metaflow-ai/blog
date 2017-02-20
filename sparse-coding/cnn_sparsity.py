@@ -29,8 +29,8 @@ with tf.variable_scope('NeuralLayer'):
     a = tf.nn.relu(z1)
 
     # We graph the average density of neurons activation
-    average_density = tf.reduce_mean(tf.reduce_sum(tf.cast((a > 0), tf.float32), reduction_indices=[1, 2, 3]))
-    tf.scalar_summary('AverageDensity', average_density)
+    average_density = tf.reduce_mean(tf.reduce_sum(tf.cast((a > 0), tf.float32), axis=[1, 2, 3]))
+    tf.summary.scalar('AverageDensity', average_density)
 
 a_vec_size = 14 * 14 * 200 
 
@@ -45,21 +45,21 @@ with tf.variable_scope('SoftmaxLayer'):
 
 with tf.variable_scope('Loss'):
     epsilon = 1e-7 # After some training, y can be 0 on some classes which lead to NaN 
-    cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_true * tf.log(y + epsilon), reduction_indices=[1]))
+    cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_true * tf.log(y + epsilon), axis=[1]))
     # We add our sparsity constraint on the activations
     # loss = cross_entropy + sparsity_constraint * (tf.reduce_sum(a1) + tf.reduce_sum(a2) + tf.reduce_sum(a))
     loss = cross_entropy + sparsity_constraint * tf.reduce_sum(a)
 
-    tf.scalar_summary('loss', loss) # Graph the loss
+    tf.summary.scalar('loss', loss) # Graph the loss
 
 # We merge summaries before the accuracy summary to avoid 
 # graphing the accuracy with training data
-summaries = tf.merge_all_summaries()
+summaries = tf.summary.merge_all()
 
 with tf.variable_scope('Accuracy'):
     correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_true, 1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-    acc_summary = tf.scalar_summary('accuracy', accuracy) 
+    acc_summary = tf.summary.scalar('accuracy', accuracy) 
 
 
 # Training
@@ -71,7 +71,7 @@ for sc in [0, 1e-5, 5e-5, 1e-4, 5e-4]:
     result_folder = dir + '/results/' + str(int(time.time())) + '-cnn-sc' + str(sc)
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
-        sw = tf.train.SummaryWriter(result_folder, sess.graph)
+        sw = tf.summary.FileWriter(result_folder, sess.graph)
         
         for i in range(20000):
             batch = mnist.train.next_batch(100)

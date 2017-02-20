@@ -25,7 +25,7 @@ with tf.variable_scope('NeuralLayer'):
     a = tf.nn.relu(z)
 
     # We graph the average density of neurons activation
-    average_density = tf.reduce_mean(tf.reduce_sum(tf.cast((a > 0), tf.float32), reduction_indices=[1]))
+    average_density = tf.reduce_mean(tf.reduce_sum(tf.cast((a > 0), tf.float32), axis=[1]))
     tf.summary.scalar('AverageDensity', average_density)
 
 with tf.variable_scope('SoftmaxLayer'):
@@ -37,7 +37,7 @@ with tf.variable_scope('SoftmaxLayer'):
 
 with tf.variable_scope('Loss'):
     epsilon = 1e-7 # After some training, y can be 0 on some classes which lead to NaN 
-    cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_true * tf.log(y + epsilon), reduction_indices=[1]))
+    cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_true * tf.log(y + epsilon), axis=[1]))
     # We add our sparsity constraint on the activations
     loss = cross_entropy + sparsity_constraint * tf.reduce_sum(a)
 

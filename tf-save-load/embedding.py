@@ -43,11 +43,11 @@ with tf.variable_scope("embedding"):
 
 with tf.variable_scope("loss"):
     y_true_reshaped = tf.reshape(y_true, [-1])
-    losses = tf.nn.sparse_softmax_cross_entropy_with_logits(z, y_true_reshaped)
+    losses = tf.nn.sparse_softmax_cross_entropy_with_logits(None, y_true_reshaped, z)
     loss_op = tf.reduce_mean(losses)
 
     # Let's track the loss
-    tf.scalar_summary('loss', loss_op)
+    tf.summary.scalar('loss', loss_op)
 
 with tf.variable_scope("Accuracy"):
     a = tf.nn.softmax(z)
@@ -71,7 +71,7 @@ graph = tf.get_default_graph()
 seq_length = 1 # We decided to predict the next word thanks only to its previous word
 nb_epochs = 200
 with tf.Session() as sess:
-    sess.run(tf.initialize_all_variables())
+    sess.run(tf.global_variables_initializer())
 
     for i in range(nb_epochs):
         input_gen = reader.ptb_iterator(id_corpus, corpus_length // 6, seq_length)
