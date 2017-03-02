@@ -1,6 +1,6 @@
 import tensorflow as tf
 
-# Let's laod a previous meta graph in the current graph in use: usually the default graph
+# Let's load a previous meta graph in the current graph in use: usually the default graph
 # This actions returns a Saver
 saver = tf.train.import_meta_graph('results/model.ckpt-1000.meta')
 

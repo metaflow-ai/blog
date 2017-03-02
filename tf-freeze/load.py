@@ -40,4 +40,4 @@ if __name__ == '__main__':
         y_out = sess.run(y, feed_dict={
             x: [[3, 5, 7, 4, 5, 1, 1, 1, 1, 1]] # < 45
         })
-        print(y_out) # [[ 0.]] Yay!
+        print(y_out) # [[ False ]] Yay!
