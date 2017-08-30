@@ -42,7 +42,7 @@ axarr[1].plot(lin_x, noisy_y)
 
 #### PART 2: Build a model based on the insights you gathered from looking into your dataset
 # We will build a basic 2-layer FC NN (It is an universal approximator after all)
-nb_hd_units = 25
+nb_hd_units = 50
 with tf.variable_scope('model'):
     x_plh = tf.placeholder(tf.float32, name='x_plh', shape=[None, 1])
     y_plh = tf.placeholder(tf.float32, name='y_plh', shape=[None, 1])
@@ -53,11 +53,11 @@ with tf.variable_scope('model'):
     b1 = tf.get_variable('b1', shape=[nb_hd_units], initializer=tf.constant_initializer(0.))
     a = tf.nn.relu(tf.matmul(x_plh, w1) + b1)
 
-    w2 = tf.get_variable('w2', shape=[nb_hd_units, nb_hd_units*2], initializer=tf.random_uniform_initializer(-2e-1, 2e-1))
-    b2 = tf.get_variable('b2', shape=[nb_hd_units*2], initializer=tf.constant_initializer(0.))
+    w2 = tf.get_variable('w2', shape=[nb_hd_units, nb_hd_units], initializer=tf.random_uniform_initializer(-2e-1, 2e-1))
+    b2 = tf.get_variable('b2', shape=[nb_hd_units], initializer=tf.constant_initializer(0.))
     a = tf.nn.relu(tf.matmul(a, w2) + b2)
 
-    w3 = tf.get_variable('w3', shape=[nb_hd_units*2, 1], initializer=tf.random_uniform_initializer(-2e-1, 2e-1))
+    w3 = tf.get_variable('w3', shape=[nb_hd_units, 1], initializer=tf.random_uniform_initializer(-2e-1, 2e-1))
     out = tf.matmul(a, w3)
 
 with tf.variable_scope('loss'):
@@ -79,7 +79,7 @@ with tf.variable_scope('loss'):
 
 # We generate our training set: 50 000 points 
 # The training data are I.I.D and following an additive noise pattern
-x = np.random.uniform(-2*math.pi, 2*math.pi, [499998, 1])
+x = np.random.uniform(-2*math.pi, 2*math.pi, [500000, 1])
 noisy_y = np.sin(x) + np.random.normal(scale=std_dev, size=(500000, 1))
 
 with tf.Session() as sess:
