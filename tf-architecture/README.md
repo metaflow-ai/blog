@@ -1,6 +1,6 @@
-# TensorFlow: A proposal of good practices for files, folder and models architecture
+# TensorFlow: A proposal of good practices for files, folders and models architecture
 
-## TL, DR! 
+## TL, DR!
 ### EN
 - I list all the different tasks one will have to do when doing ML
 - I show a common folder structure that I believe handles all possible use cases nicely
