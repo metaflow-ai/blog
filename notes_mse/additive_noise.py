@@ -12,6 +12,9 @@ import tensorflow as tf
 # 2 - We sample some inpus point from a distribution on this interval 
 # 3 - We compute their corresponding sinus value
 # 4 - We add additive noise to our perfect output values to create our noisy output values
+# 5 - We learn from the dataset we juste created and recover the sinus function on the interval
+# 6 - We show that if we sample some data outside of the interval, mothing works anymore 
+#       (breaking the  identically distributed assumption)
 #############################################
 
 
@@ -34,13 +37,13 @@ noisy_y = y + noises
 
 f, axarr = plt.subplots(5, sharex=True)
 f.subplots_adjust(hspace=1.)
-axarr[0].set_title('Sinus function, what we want to approximate')
+axarr[0].set_title('Sinus function: what we want to approximate')
 axarr[0].plot(lin_x, y)
-axarr[1].set_title('Noisy Sinus data, what we actually observe')
+axarr[1].set_title('Noisy Sinus data: what we actually observe')
 axarr[1].plot(lin_x, noisy_y)
 #### END PART 1
 
-#### PART 2: Build a model based on the insights you gathered from looking into your dataset
+#### PART 2: Build a model based on the insights we gathered from looking into your dataset
 # We will build a basic 2-layer FC NN (It is an universal approximator after all)
 nb_hd_units = 50
 with tf.variable_scope('model'):
@@ -49,22 +52,28 @@ with tf.variable_scope('model'):
 
     # Notice that I use the uniform prior to initialize my parameters
     # In this case: Maximum a posteriori (MAP) = Maximum Likelihood Estimate (MLE)
-    w1 = tf.get_variable('w1', shape=[1, nb_hd_units], initializer=tf.random_uniform_initializer(-2e-1, 2e-1))
-    b1 = tf.get_variable('b1', shape=[nb_hd_units], initializer=tf.constant_initializer(0.))
+    w1 = tf.get_variable('w1', shape=[1, nb_hd_units], 
+        initializer=tf.random_uniform_initializer(-2e-1, 2e-1))
+    b1 = tf.get_variable('b1', shape=[nb_hd_units], 
+        initializer=tf.constant_initializer(0.))
     a = tf.nn.relu(tf.matmul(x_plh, w1) + b1)
 
-    w2 = tf.get_variable('w2', shape=[nb_hd_units, nb_hd_units], initializer=tf.random_uniform_initializer(-2e-1, 2e-1))
-    b2 = tf.get_variable('b2', shape=[nb_hd_units], initializer=tf.constant_initializer(0.))
+    w2 = tf.get_variable('w2', shape=[nb_hd_units, nb_hd_units], 
+        initializer=tf.random_uniform_initializer(-2e-1, 2e-1))
+    b2 = tf.get_variable('b2', shape=[nb_hd_units], 
+        initializer=tf.constant_initializer(0.))
     a = tf.nn.relu(tf.matmul(a, w2) + b2)
 
-    w3 = tf.get_variable('w3', shape=[nb_hd_units, 1], initializer=tf.random_uniform_initializer(-2e-1, 2e-1))
+    w3 = tf.get_variable('w3', shape=[nb_hd_units, 1], 
+        initializer=tf.random_uniform_initializer(-2e-1, 2e-1))
     out = tf.matmul(a, w3)
 
 with tf.variable_scope('loss'):
     # From the optimization point of view, I need a decreasing learning rate to converge
     global_step = tf.Variable(0, trainable=False)
     starter_lr = 5e-1
-    # See this as: the first half of training is to fit globally the data, the last half of the training is to make more fine grained tuning
+    # See this as: the first half of training is to fit globally the data, 
+    # the last half of the training is to make more fine grained tuning
     lr = tf.train.exponential_decay(starter_lr, global_step, 2000, 0.3, staircase=True)
 
     # I'm keeping this simple:
@@ -97,9 +106,8 @@ with tf.Session() as sess:
                 x_plh: perm_x[j*500:(j+1)*500, :],
                 y_plh: perm_noisy_y[j*500:(j+1)*500, :]
             })
-            if j % 200 == 0:
+            if j % 500 == 0:
                 print("Epoch: %d - %d%%, lr: %f, loss: %f" % (i, int(j/10), lr_out, l))
-        print("Epoch: %d - %d%%, lr: %f, loss: %f" % (i, 100, lr_out, l))
 
     # Let's graph the output of our neural network on the same distribu
     neural_y = sess.run(out, feed_dict={
@@ -117,7 +125,7 @@ with tf.Session() as sess:
 
 axarr[2].set_title('Neural reconstruction')
 axarr[2].plot(lin_x, neural_y)
-axarr[3].set_title('Absolute error with the original sinus function')
+axarr[3].set_title('Absolute mean error: ' + str(int(np.mean(neural_y - y) * 1000)/1000) )
 axarr[3].plot(lin_x, np.abs(neural_y - y))
 axarr[4].set_title('Test set translated by 2 pi (not IID)')
 axarr[4].plot(lin_x_not_iid, neural_y_not_iid)

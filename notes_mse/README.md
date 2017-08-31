@@ -39,10 +39,13 @@ y^{(i)} &= h(x^{(i)} \times \epsilon^{(i)}) + \varepsilon^{(i)} \\
 
 ```
 \begin{align}
-&\text{We have } \varepsilon^{(i)} = y^{(i)} - h_{\theta, m}(x^{(i)}) \text{ and } \varepsilon \sim \mathcal{N}(0, \sigma^2) \\
-&\Rightarrow p(y^{(i)} | x^{(i)}, \theta, m) = \frac{1}{\sqrt{2\pi}\sigma}e^{-\frac{(y^{(i)} - h_{\theta, m}(x^{(i)}))^2}{2\sigma^2}} \\
-&\Rightarrow log(p(y^{(i)} | x^{(i)}, \theta, m)) =  \log\frac{1}{\sqrt{2\pi}\sigma} - \frac{1}{\sigma^2} \frac{1}{2} (y^{(i)} - h_{\theta, m}(x^{(i)}))^2 \\
-&\Rightarrow \underset{\theta}{\text{ argmax }} \sum_i \log(p(d^{(i)} | \theta, m)) = \underset{\theta}{\text{ argmin }} \frac{1}{2}\sum_i^N(y^{(i)} - h_{\theta, m}(x^{(i)}))^2
+&\text{For a datum } d = \{x, y\} \text{ we have } y = h_{\theta, m}(x) + \varepsilon \\
+&\Rightarrow p(y | x, \theta, m) = p(h_{\theta, m}(x) + \varepsilon| x, \theta, m) \\
+&\Rightarrow p(y | x, \theta, m) = p(h_{\theta, m}(x) | x, \theta, m) \times p(\varepsilon | x, \theta, m) \\
+&\Rightarrow p(y | x, \theta, m) = 1 \times p(\varepsilon) \\
+&\Rightarrow log(p(y | x, \theta, m)) =  \log\frac{1}{\sqrt{2\pi}\sigma} - \frac{1}{\sigma^2} \frac{1}{2} \varepsilon^2 \\
+&\Rightarrow log(p(y | x, \theta, m)) =  \log\frac{1}{\sqrt{2\pi}\sigma} - \frac{1}{\sigma^2} \frac{1}{2} (y - h_{\theta, m}(x))^2 \\
+&\Rightarrow \underset{\theta}{\text{ argmax }} \sum_i \log(p(d | \theta, m)) = \underset{\theta}{\text{ argmin }} \frac{1}{2}\sum_i^N(y - h_{\theta, m}(x))^2
 \end{align}
 ```
 
