@@ -1,4 +1,4 @@
-# ML notes: Why the log-likelihood ?
+# ML notes: Why the log-likelihood?
 
 ## TL, DR!
 ### EN
