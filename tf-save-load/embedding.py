@@ -19,35 +19,34 @@ def batch_text(corpus, batch_size, seq_length):
 
         
 # Let's take a usual usecase you might have:
-# You want to train a NN on a NLP task but first you want to train an embedding on your corpus to maximise your result (arguing about the fact that word embedding are better/worst than character solutions is beyond the scope of this article)
-# This lead you to create
+# You want to train a NN on a NLP task to do predictive coding on a corpus using an embedding
+# This is an unsupervised task, one can see this as a way to evaluate the capcity of model in terms of pure memorisation
 
-# here is our corpus
+# We load our corpus
 with open("lorem.txt", 'r') as f:
     text = f.read()
 corpus = text.split()
 corpus_length = len(corpus)
-# let's create an embedding
-# first let's build our dictrionnariesa nd count how namy unique word (token) we have:
+# We build our mapping between token ids and tokens
 tokens = set(corpus)
 word_to_id_dict = { word:i for i, word in enumerate(tokens) }
 id_to_word_dict = { i:word for word,i in word_to_id_dict.items() }
 id_corpus = [ word_to_id_dict[word] for word in corpus ]
 nb_token = len(tokens)
 
-# This will be our first dimension, then we will choose (this is an hyper parameter) in how many dimensions we want to mebed our words
-# For the sake of this blog post, let's keep it very simple and chose 30
-dim_embedding = 30
 
-# We decide to predict the next word thanks only to its previous word
+# We will train this embedding with predictive coding
+# The input of our model is a number "seq_length" of precedent words ids 
+# and the output is the id of next word
 seq_length = 5
-
-# We will train this embedding with the most simple prior we can: a word is dependant on the previous one
-# So the input of our model is a word and the output is the id of next word
 with tf.variable_scope("placeholder"):
     x = tf.placeholder(tf.int32, shape=[None, seq_length], name="x")
     y_true = tf.placeholder(tf.int32, shape=[None, 1], name="y_true")
 
+
+# We create an embedding
+# We choose in how many dimensions we want to embed our word vectors
+dim_embedding = 30
 with tf.variable_scope("embedding"):
     # Let's build our embedding, we intialize it with s impel random normal centerd on 0 with a small variance
     embedding = tf.get_variable("embedding", shape=[nb_token, dim_embedding], initializer=tf.random_normal_initializer(0., 1e-3))
@@ -55,6 +54,7 @@ with tf.variable_scope("embedding"):
     context_vec = tf.nn.embedding_lookup(embedding, x, name="lookup") # Dim: bs x seq_length x dim_embedding
     context_vec = tf.reshape(context_vec, [tf.shape(x)[0], seq_length * dim_embedding])
 
+# We build a Neural net to predict the next word vector
 with tf.variable_scope("1layer"):
     # We use the context vector to predict the next word vector inside the embedding
     W1 = tf.get_variable("W1", dtype=tf.float32, shape=[seq_length * dim_embedding, dim_embedding])
@@ -65,7 +65,7 @@ with tf.variable_scope("1layer"):
     b2 = tf.get_variable("b2", dtype=tf.float32, shape=[dim_embedding], initializer=tf.constant_initializer(.1))
     y_vector = tf.matmul(h1, W2) + b2 # Dim: bs x dim_embeddiing 
 
-    # Now we calculated the dot product of the current words with all other words
+    # Now we calculated the dot product of the current words with all other words vectors
     z = tf.matmul(y_vector, tf.transpose(embedding)) # Dim: bs x nb_token
 
 with tf.variable_scope("loss"):
@@ -93,14 +93,11 @@ with tf.variable_scope('Optimizer'):
 
     summaries = tf.summary.merge_all()
 
-
+# We build a Saver in the default graph handling all existing Variables
 saver = tf.train.Saver()
-# We are going to use a helper function to create our inputs and labels
-# The ptb_iterator is just a helper shifiting all the words by one and returning
-# seq_length words for you to predict the next output
-# very handy for RNN or our case
+
 nb_epochs = 500
-with tf.Session() as sess:
+with tf.Session() as sess: # The Session handles the default graph too
     sess.run(tf.global_variables_initializer())
     sw = tf.summary.FileWriter(results_dir, sess.graph)
 
@@ -114,9 +111,11 @@ with tf.Session() as sess:
             }
             _, loss, global_step, summaries_metric = sess.run(to_compute, feed_dict=feed_dict)
 
+            # We add a data point in our "events..." file
             sw.add_summary(summaries_metric, global_step)
 
         if (i + 1) % 250 == 0:
+            # We save our model
             saver.save(sess, results_dir + '/model', global_step=i + 1)
 
     # We compute the final accuracy
