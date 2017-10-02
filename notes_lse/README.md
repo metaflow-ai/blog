@@ -57,8 +57,10 @@ p(d^{(i)} | \theta, m) &= p(x^{(i)}, y^{(i)} | \theta, m) \tag{2} \\
 ```
 Given that: $ Y = h_{\theta, m}(X) + Z $ and $ d = \{x, y\} $ we have:
 \begin{align}
-&p(Y=y | X=x, \theta, m) = p(Z= y - h_{\theta, m}(X) | X=x, \theta, m) \tag{8} \\
-\Leftrightarrow &p(Y=y | X=x, \theta, m) = p(Z= y - h_{\theta, m}(x)) \tag{9} \\
+p(Y=y | X=x, \theta, m) &= p(Z= y - h_{\theta, m}(X) | X=x, \theta, m) \tag{8} \\
+ &= p(Z= y - h_{\theta, m}(x)) \tag{9}
+\end{align}
+\begin{align}
 \Leftrightarrow &p(Y=y | x, \theta, m) =  \frac{1}{\sqrt{2\pi}\sigma} e^{- \frac{(y - h_{\theta, m}(x))^2}{2\sigma^2}} \tag{10} \\
 \Leftrightarrow &log(p(Y=y | x, \theta, m)) =  \log\frac{1}{\sqrt{2\pi}\sigma} - \frac{1}{\sigma^2} \frac{1}{2} (y - h_{\theta, m}(x))^2 \tag{11} \\
 \Rightarrow &\underset{\theta}{\text{ argmax }} \sum_i \log(p(d | \theta, m)) = \underset{\theta}{\text{ argmin }} \frac{1}{2}\sum_i(y - h_{\theta, m}(x))^2 \tag{12}
